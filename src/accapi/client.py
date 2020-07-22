@@ -119,77 +119,52 @@ class AccClient(object):
         return out
 
     def _receive_registration_result(self):
-        (
-            self._connectionId,
-            success,
-            writable,
-            errorMessage
-        ) = self._receive("i??s")
-        if not success:
+        result = RegistrationResult.receive(self._receive)
+        if not result.success:
             self.stop()
             for callback in self._onConnectionStateChange.callbacks:
-                callback(Event(self, state = f"rejected ({errorMessage})"))
+                callback(Event(self, state = f"rejected ({result.errorMessage})"))
         for callback in self._onConnectionStateChange.callbacks:
             callback(Event(self, state = "established"))
-        self._writable = writable
         self._request_entry_list()
         self._request_track_data()
 
-    def _receive_lap_args(self):
-        args = self._receive("iHHB")
-        args.extend(self._receive("i" * args[-1]))
-        args.extend(self._receive("????"))
-        return args
-
     def _receive_realtime_update(self):
-        args = self._receive("HHBBffisss?")
-        if args[-1]:
-            args.extend(self._receive("ff"))
-        args.extend(self._receive("fBBBBB"))
-        args.extend(self._receive_lap_args())
+        args = RealtimeUpdate.receive_args(self._receive)
         for callback in self._onRealtimeUpdate.callbacks:
             update = RealtimeUpdate(*args)
             callback(Event(self, update = update))
 
     def _receive_realtime_car_udpate(self):
-        args = self._receive("HHBBfffBHHHHfHi")
-        for _ in range(3):
-            args.extend(self._receive_lap_args())
-        carIndex = args[0]
-        driverCount = args[2]
-        if carIndex in self._cars and self._cars[carIndex] == driverCount:
+        args = RealtimeCarUpdate.receive_args(self._receive)
+        update = RealtimeCarUpdate(*args)
+        if update.carIndex in self._cars and self._cars[update.carIndex] == update.driverCount:
             for callback in self._onRealtimeCarUpdate.callbacks:
-                update = CarUpdate(*args)
+                update = RealtimeCarUpdate(*args)
                 callback(Event(self, update = update))
         else:
             self._request_entry_list()
 
     def _receive_entry_list(self):
-        args = self._receive("iH")
-        self._cars = {i: None for i in self._receive("H" * args[-1])}
+        entryList = EntryList.receive(self._receive)
+        self._cars = {i: self._cars[i] if i in self._cars else -1 for i in entryList.carIndices}
 
     def _receive_entry_list_car(self):
-        args = self._receive("HBsiBBHB")
-        driverCount = args[-1]
-        args.extend(self._receive("sssBH" * driverCount))
-        self._cars[args[0]] = driverCount
+        args = EntryListCar.receive_args(self._receive)
+        car = EntryListCar(*args)
+        self._cars[car.carIndex] = car.driverCount
         for callback in self._onEntryListCarUpdate.callbacks:
-            carInfo = CarInfo(*args)
-            callback(Event(self, carInfo = carInfo))
+            car = EntryListCar(*args)
+            callback(Event(self, car = car))
 
     def _receive_track_data(self):
-        args = self._receive("isiiB")
-        for _ in range(args[-1]):
-            args.extend(self._receive("sB"))
-            args.extend(self._receive("s" * args[-1]))
-        args.extend(self._receive("B"))
-        args.extend(self._receive("s" * args[-1]))
+        args = TrackData.receive_args(self._receive)
         for callback in self._onTrackDataUpdate.callbacks:
             data = TrackData(*args)
             callback(Event(self, data = data))
 
     def _receive_broadcasting_event(self):
-        args = self._receive("Bsii")
+        args = BroadcastingEvent.receive_args(self._receive)
         for callback in self._onBroadcastingEvent.callbacks:
             event = BroadcastingEvent(*args)
             callback(Event(self, event = event))
