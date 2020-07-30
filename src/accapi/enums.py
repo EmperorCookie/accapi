@@ -14,6 +14,13 @@ class OutboundMessageTypes(Enum):
     PLAY_MANUAL_REPLAY_HIGHLIGHT = 52
     SAVE_MANUAL_REPLAY_HIGHLIGHT = 60
 
+LAP_TYPE = \
+{
+    0: "Regular",
+    1: "Outlap",
+    2: "Inlap"
+}
+
 DRIVER_CATEGORY = \
 {
     0: "Bronze",
@@ -21,14 +28,6 @@ DRIVER_CATEGORY = \
     2: "Gold",
     3: "Platinum",
     255: "Unknown"
-}
-
-LAP_TYPE = \
-{
-    0: "Unknown",
-    1: "Outlap",
-    2: "Regular",
-    3: "Inlap"
 }
 
 CAR_LOCATION = \
@@ -53,7 +52,7 @@ SESSION_PHASE = \
     8: "Result UI"
 }
 
-RACE_SESSION_TYPE = \
+SESSION_TYPE = \
 {
     0: "Practice",
     4: "Qualifying",
@@ -65,7 +64,7 @@ RACE_SESSION_TYPE = \
     14: "Replay"
 }
 
-BROADCASTING_CAR_EVENT_TYPE = \
+BROADCASTING_EVENT_TYPE = \
 {
     0: "Unknown",
     1: "Green Flag",

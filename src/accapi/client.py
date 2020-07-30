@@ -152,7 +152,7 @@ class AccClient(object):
     def _receive_entry_list_car(self):
         args = EntryListCar.receive_args(self._receive)
         car = EntryListCar(*args)
-        self._cars[car.carIndex] = car.driverCount
+        self._cars[car.carIndex] = len(car.drivers)
         for callback in self._onEntryListCarUpdate.callbacks:
             car = EntryListCar(*args)
             callback(Event(self, car = car))
