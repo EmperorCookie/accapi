@@ -4,7 +4,14 @@ import socket
 import struct
 
 from .enums import OutboundMessageTypes
-from .structs import *
+from .structs import \
+    RegistrationResult, \
+    RealtimeUpdate, \
+    RealtimeCarUpdate, \
+    EntryList, \
+    EntryListCar, \
+    TrackData, \
+    BroadcastingEvent
 
 class Event(object):
     def __init__(self, source, **kwargs):
@@ -33,6 +40,7 @@ class AccClient(object):
         self._displayName = displayName
         self._updateIntervalMs = updateIntervalMs
         self._socket = None
+        self._connectionState = "disconnected"
 
         # Callbacks
         self._onConnectionStateChange = Observable()
@@ -62,6 +70,16 @@ class AccClient(object):
         # Thread
         self._stopSignal = False
         self._thread = None
+
+    def _update_connection_state(self, state):
+        if state != self._connectionState:
+            self._connectionState = state
+            for callback in self._onConnectionStateChange.callbacks:
+                callback(Event(self, state = state))
+
+    @property
+    def connectionState(self):
+        return self._connectionState
 
     @property
     def onConnectionStateChange(self):
@@ -121,11 +139,8 @@ class AccClient(object):
     def _receive_registration_result(self):
         result = RegistrationResult.receive(self._receive)
         if not result.success:
-            self.stop()
-            for callback in self._onConnectionStateChange.callbacks:
-                callback(Event(self, state = f"rejected ({result.errorMessage})"))
-        for callback in self._onConnectionStateChange.callbacks:
-            callback(Event(self, state = "established"))
+            self._stop(state = f"rejected ({result.errorMessage})")
+        self._update_connection_state("established")
         self._request_entry_list()
         self._request_track_data()
 
@@ -265,8 +280,7 @@ class AccClient(object):
             try:
                 messageType = self._receive("B")
             except ConnectionResetError:
-                for callback in self._onConnectionStateChange.callbacks:
-                    callback(Event(self, state = "lost"))
+                self._update_connection_state("lost")
                 break
             self._receiveMethods[messageType]()
         self._socket.close()
@@ -286,7 +300,8 @@ class AccClient(object):
         commandPassword: str = ""
     ):
         if self.isAlive:
-            raise ValueError("Must be disconnected")
+            raise ValueError("Must be stopped")
+        self._update_connection_state("connecting")
         self._server = (url, port)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket.settimeout(1)
@@ -305,7 +320,12 @@ class AccClient(object):
 
     def stop(self):
         if not self.isAlive:
-            raise ValueError("Must be connected")
+            raise ValueError("Must be started")
+        self._stop()
+
+    def _stop(self, state = "disconnected"):
         self._stopSignal = True
-        self._thread.join()
-        self._thread = None
+        if self._thread is not None:
+            self._thread.join()
+            self._thread = None
+        self._update_connection_state(state)
