@@ -106,13 +106,13 @@ class AccClient(object):
         return self._onBroadcastingEvent
 
     def _send(self, *fmtValuePairs):
-        fmt = "!"
+        fmt = "<"
         values = []
         for f, v in fmtValuePairs:
             if f == "s":
                 encoded = v.encode("utf8")
                 length = len(encoded)
-                fmt += "I"
+                fmt += "H"
                 values.append(length)
                 if length > 0:
                     fmt += f"{length}s"
@@ -196,7 +196,7 @@ class AccClient(object):
             ("B", self._broadcastingProtocolVersion),
             ("s", displayName),
             ("s", password),
-            ("i", self._updateIntervalMs),
+            ("B", self._updateIntervalMs),
             ("s", commandPassword)
         )
 
