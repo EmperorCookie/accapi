@@ -1,6 +1,28 @@
+import struct
+
 from .enums import *
 
 _MAX_INT = 2 ** 31 - 1
+
+
+def unpack_next(msg: list, fmt):
+    out = []
+    for f in fmt:
+        if f == "s":
+            length, = struct.unpack("<H", bytes(msg[:2]))
+            del msg[:2]
+            if length > 0:
+                out.append(bytes(msg[:length]).decode("utf8"))
+                del msg[:length]
+            else:
+                out.append("")
+        else:
+            fmt_size = struct.calcsize(f)
+            val, = struct.unpack(f"<{f}", bytes(msg[:fmt_size]))
+            del msg[:fmt_size]
+            out.append(val)
+    return out
+
 
 class RegistrationResult(object):
 
@@ -13,13 +35,13 @@ class RegistrationResult(object):
         self._leftovers = args
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("i??s")
-        return args
+    def parse(msg):
+        return unpack_next(msg, "i??s")
+
 
 class RealtimeUpdate(object):
 
@@ -52,17 +74,18 @@ class RealtimeUpdate(object):
         self._leftovers = args
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("HHBBffisss?")
+    def parse(msg):
+        args = unpack_next(msg, "HHBBffisss?")
         if args[-1]:
-            args.extend(receiveMethod("ff"))
-        args.extend(receiveMethod("fBBBBB"))
-        args.extend(Lap.receive_args(receiveMethod))
+            args.extend(unpack_next(msg, "ff"))
+        args.extend(unpack_next(msg, "fBBBBB"))
+        args.extend(Lap.parse(msg))
         return args
+
 
 class Lap(object):
 
@@ -82,15 +105,16 @@ class Lap(object):
         self._leftovers = args
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("iHHB")
-        args.extend(receiveMethod("i" * args[-1]))
-        args.extend(receiveMethod("????"))
+    def parse(msg):
+        args = unpack_next(msg, "iHHB")
+        args.extend(unpack_next(msg, "i" * args[-1]))
+        args.extend(unpack_next(msg, "????"))
         return args
+
 
 class RealtimeCarUpdate(object):
 
@@ -117,15 +141,16 @@ class RealtimeCarUpdate(object):
         self._leftovers = self.currentLap._leftovers
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("HHBBfffBHHHHfHi")
+    def parse(msg):
+        args = unpack_next(msg, "HHBBfffBHHHHfHi")
         for _ in range(3):
-            args.extend(Lap.receive_args(receiveMethod))
+            args.extend(Lap.parse(msg))
         return args
+
 
 class EntryList(object):
 
@@ -136,14 +161,15 @@ class EntryList(object):
         self._leftovers = args
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("iH")
-        args.extend(receiveMethod("H" * args[-1]))
+    def parse(msg):
+        args = unpack_next(msg, "iH")
+        args.extend(unpack_next(msg, "H" * args[-1]))
         return args
+
 
 class Driver(object):
 
@@ -157,13 +183,14 @@ class Driver(object):
         self._leftovers = args
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("sssBH")
+    def parse(msg):
+        args = unpack_next(msg, "sssBH")
         return args
+
 
 class EntryListCar(object):
 
@@ -183,15 +210,16 @@ class EntryListCar(object):
         self._leftovers = args
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("HBsiBBHB")
+    def parse(msg):
+        args = unpack_next(msg, "HBsiBBHB")
         for _ in range(args[-1]):
-            args.extend(Driver.receive_args(receiveMethod))
+            args.extend(Driver.parse(msg))
         return args
+
 
 class TrackData(object):
 
@@ -206,18 +234,19 @@ class TrackData(object):
         self._leftovers = args
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("isiiB")
+    def parse(msg):
+        args = unpack_next(msg, "isiiB")
         for _ in range(args[-1]):
-            args.extend(receiveMethod("sB"))
-            args.extend(receiveMethod("s" * args[-1]))
-        args.extend(receiveMethod("B"))
-        args.extend(receiveMethod("s" * args[-1]))
+            args.extend(unpack_next(msg, "sB"))
+            args.extend(unpack_next(msg, "s" * args[-1]))
+        args.extend(unpack_next(msg, "B"))
+        args.extend(unpack_next(msg, "s" * args[-1]))
         return args
+
 
 class BroadcastingEvent(object):
 
@@ -230,10 +259,10 @@ class BroadcastingEvent(object):
         self._leftovers = args
 
     @classmethod
-    def receive(cls, receiveMethod):
-        return cls(*cls.receive_args(receiveMethod))
+    def from_message(cls, msg):
+        return cls(*cls.parse(msg))
 
     @staticmethod
-    def receive_args(receiveMethod):
-        args = receiveMethod("Bsii")
+    def parse(msg):
+        args = unpack_next(msg, "Bsii")
         return args

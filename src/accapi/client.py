@@ -30,6 +30,7 @@ class Observable(object):
     def subscribe(self, callback):
         self._callbacks.append(callback)
 
+
 class AccClient(object):
     def __init__(
         self,
@@ -51,6 +52,7 @@ class AccClient(object):
         self._onBroadcastingEvent = Observable()
 
         # Session properties
+        self._udpBufferSize = 1024
         self._broadcastingProtocolVersion = 4
         self._connectionId = None
         self._entryList = []
@@ -122,36 +124,22 @@ class AccClient(object):
                 values.append(v)
         self._socket.sendto(struct.pack(fmt, *values), self._server)
 
-    def _receive(self, fmt):
-        out = []
-        for f in fmt:
-            if f == "s":
-                length, = struct.unpack("!H", self._socket.recv(2))
-                if length > 0:
-                    out.append(self._socket.recv(length).decode("utf8"))
-                else:
-                    out.append("")
-            else:
-                val, = struct.unpack(f"!{f}", self._socket.recv(struct.calcsize(f)))
-                out.append(val)
-        return out
-
-    def _receive_registration_result(self):
-        result = RegistrationResult.receive(self._receive)
+    def _receive_registration_result(self, msg):
+        result = RegistrationResult.from_message(msg)
         if not result.success:
             self._stop(state = f"rejected ({result.errorMessage})")
         self._update_connection_state("established")
         self._request_entry_list()
         self._request_track_data()
 
-    def _receive_realtime_update(self):
-        args = RealtimeUpdate.receive_args(self._receive)
+    def _receive_realtime_update(self, msg):
+        args = RealtimeUpdate.parse(msg)
         for callback in self._onRealtimeUpdate.callbacks:
             update = RealtimeUpdate(*args)
             callback(Event(self, update = update))
 
-    def _receive_realtime_car_udpate(self):
-        args = RealtimeCarUpdate.receive_args(self._receive)
+    def _receive_realtime_car_udpate(self, msg):
+        args = RealtimeCarUpdate.parse(msg)
         update = RealtimeCarUpdate(*args)
         if update.carIndex in self._cars and self._cars[update.carIndex] == update.driverCount:
             for callback in self._onRealtimeCarUpdate.callbacks:
@@ -160,26 +148,26 @@ class AccClient(object):
         else:
             self._request_entry_list()
 
-    def _receive_entry_list(self):
-        entryList = EntryList.receive(self._receive)
+    def _receive_entry_list(self, msg):
+        entryList = EntryList.from_message(msg)
         self._cars = {i: self._cars[i] if i in self._cars else -1 for i in entryList.carIndices}
 
-    def _receive_entry_list_car(self):
-        args = EntryListCar.receive_args(self._receive)
+    def _receive_entry_list_car(self, msg):
+        args = EntryListCar.parse(msg)
         car = EntryListCar(*args)
         self._cars[car.carIndex] = len(car.drivers)
         for callback in self._onEntryListCarUpdate.callbacks:
             car = EntryListCar(*args)
             callback(Event(self, car = car))
 
-    def _receive_track_data(self):
-        args = TrackData.receive_args(self._receive)
+    def _receive_track_data(self, msg):
+        args = TrackData.parse(msg)
         for callback in self._onTrackDataUpdate.callbacks:
             data = TrackData(*args)
             callback(Event(self, data = data))
 
-    def _receive_broadcasting_event(self):
-        args = BroadcastingEvent.receive_args(self._receive)
+    def _receive_broadcasting_event(self, msg):
+        args = BroadcastingEvent.parse(msg)
         for callback in self._onBroadcastingEvent.callbacks:
             event = BroadcastingEvent(*args)
             callback(Event(self, event = event))
@@ -278,11 +266,12 @@ class AccClient(object):
     def _run(self):
         while not self._stopSignal:
             try:
-                messageType = self._receive("B")
+                message = self._socket.recv(self._udpBufferSize)
             except ConnectionResetError:
                 self._update_connection_state("lost")
                 break
-            self._receiveMethods[messageType]()
+            messageType = struct.unpack("B", message[:1])[0]
+            self._receiveMethods[messageType](list(message[1:]))
         self._socket.close()
         self._socket = None
 
