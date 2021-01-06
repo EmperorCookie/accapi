@@ -96,7 +96,7 @@ class Lap(object):
         self.driverIndex = args.pop(0)
         self.splits = [args.pop(0) for _ in range(args.pop(0))]
         if len(self.splits) < 3:
-            self.splits.extend([None] * 3 - len(self.splits))
+            self.splits.extend([None] * (3 - len(self.splits)))
         self.isInvalid = args.pop(0)
         self.isValidForBest = args.pop(0)
         self.isOutlap = args.pop(0)

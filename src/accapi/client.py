@@ -56,6 +56,7 @@ class AccClient(object):
         self._broadcastingProtocolVersion = 4
         self._connectionId = None
         self._entryList = []
+        self._cars = {}
 
         # Receive methods
         self._receiveMethods = \
@@ -128,6 +129,8 @@ class AccClient(object):
         result = RegistrationResult.from_message(msg)
         if not result.success:
             self._stop(state = f"rejected ({result.errorMessage})")
+            return
+        self._connectionId = result.connectionId
         self._update_connection_state("established")
         self._request_entry_list()
         self._request_track_data()
