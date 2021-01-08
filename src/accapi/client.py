@@ -55,6 +55,7 @@ class AccClient(object):
         self._udpBufferSize = 1024
         self._broadcastingProtocolVersion = 4
         self._connectionId = None
+        self._expecting_response = False
         self._entryList = []
         self._cars = {}
 
@@ -123,6 +124,7 @@ class AccClient(object):
             else:
                 fmt += f
                 values.append(v)
+        self._expecting_response = True
         self._socket.sendto(struct.pack(fmt, *values), self._server)
 
     def _receive_registration_result(self, msg):
@@ -274,6 +276,11 @@ class AccClient(object):
                 self._update_connection_state("lost")
                 break
             messageType = struct.unpack("B", message[:1])[0]
+            # Ignore realtime updates while a response is expected
+            if self._expecting_response and messageType in (2, 3):
+                continue
+            else:
+                self._expecting_response = False
             self._receiveMethods[messageType](list(message[1:]))
         self._socket.close()
         self._socket = None
