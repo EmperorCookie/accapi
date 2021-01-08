@@ -229,7 +229,13 @@ class TrackData(object):
         self.trackName = args.pop(0)
         self.trackId = args.pop(0)
         self.trackMeters = args.pop(0)
-        self.cameraSets = {args.pop(0): [args.pop(0) for _ in range(args.pop(0))] for _ in range(args.pop(0))}
+        d = {}
+        for _ in range(args.pop(0)):
+            l = []
+            d[args.pop(0)] = l
+            for _ in range(args.pop(0)):
+                l.append(args.pop(0))
+        self.cameraSets = d
         self.hudPages = [args.pop(0) for _ in range(args.pop(0))]
         self._leftovers = args
 
