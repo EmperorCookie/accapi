@@ -272,6 +272,9 @@ class AccClient(object):
         while not self._stopSignal:
             try:
                 message = self._socket.recv(self._udpBufferSize)
+            except socket.timeout:
+                self._update_connection_state("timeout")
+                continue
             except ConnectionResetError:
                 self._update_connection_state("lost")
                 break
