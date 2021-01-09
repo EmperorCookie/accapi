@@ -186,7 +186,10 @@ class AccClient(object):
         )
 
     def _request_disconnection(self):
-        self._send(("B", OutboundMessageTypes.UNREGISTER_COMMAND_APPLICATION.value))
+        self._send(
+            ("B", OutboundMessageTypes.UNREGISTER_COMMAND_APPLICATION.value),
+            ("i", self._connectionId)
+        )
 
     def _request_entry_list(self):
         self._send(
@@ -262,19 +265,23 @@ class AccClient(object):
 
     def _run(self):
         self._request_connection()
-        while not self._stopSignal:
-            try:
-                message = self._socket.recv(self._udpBufferSize)
-            except socket.timeout:
-                self._update_connection_state("timeout")
-                continue
-            except ConnectionResetError:
-                self._update_connection_state("lost")
-                break
-            messageType = struct.unpack("B", message[:1])[0]
-            self._receiveMethods[messageType](list(message[1:]))
-        self._socket.close()
-        self._socket = None
+        try:
+            while not self._stopSignal:
+                try:
+                    message = self._socket.recv(self._udpBufferSize)
+                except socket.timeout:
+                    self._update_connection_state("timeout")
+                    continue
+                except ConnectionResetError:
+                    self._update_connection_state("lost")
+                    break
+                messageType = struct.unpack("B", message[:1])[0]
+                self._receiveMethods[messageType](list(message[1:]))
+        finally:
+            if self._connectionId is not None:
+                self._request_disconnection()
+            self._socket.close()
+            self._socket = None
 
     @property
     def isAlive(self):
