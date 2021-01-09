@@ -177,20 +177,14 @@ class AccClient(object):
             event = BroadcastingEvent(*args)
             callback(Event(self, event = event))
 
-    def _request_connection(
-        self,
-        displayName: str,
-        password: str,
-        updateIntervalMs: int,
-        commandPassword: str
-    ):
+    def _request_connection(self):
         self._send(
             ("B", OutboundMessageTypes.REGISTER_COMMAND_APPLICATION.value),
             ("B", self._broadcastingProtocolVersion),
-            ("s", displayName),
-            ("s", password),
+            ("s", self._displayName),
+            ("s", self._password),
             ("B", self._updateIntervalMs),
-            ("s", commandPassword)
+            ("s", self._commandPassword)
         )
 
     def _request_disconnection(self):
@@ -269,6 +263,7 @@ class AccClient(object):
         )
 
     def _run(self):
+        self._request_connection()
         while not self._stopSignal:
             try:
                 message = self._socket.recv(self._udpBufferSize)
@@ -301,6 +296,8 @@ class AccClient(object):
         password: str,
         commandPassword: str = ""
     ):
+        self._password = password
+        self._commandPassword = commandPassword
         if self.isAlive:
             raise ValueError("Must be stopped")
         self._update_connection_state("connecting")
@@ -309,14 +306,7 @@ class AccClient(object):
         self._socket.settimeout(1)
         self._connectionId = None
         self._writable = False
-        self._request_connection(
-            self._displayName,
-            password,
-            self._updateIntervalMs,
-            commandPassword
-        )
         self._thread = Thread(target = self._run)
-        self._thread.setDaemon(True)
         self._stopSignal = False
         self._thread.start()
 
