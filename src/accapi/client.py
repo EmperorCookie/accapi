@@ -275,6 +275,9 @@ class AccClient(object):
                 except ConnectionResetError:
                     self._update_connection_state("lost")
                     break
+                # If we received a message after a timeout and we were already registered, change connection state
+                if self._connectionState == "timeout" and self._connectionId is not None:
+                    self._update_connection_state("established")
                 messageType = struct.unpack("B", message[:1])[0]
                 self._receiveMethods[messageType](list(message[1:]))
         finally:
