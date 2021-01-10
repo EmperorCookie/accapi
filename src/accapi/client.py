@@ -182,7 +182,9 @@ class AccClient(object):
             ("s", self._displayName),
             ("s", self._password),
             ("B", self._updateIntervalMs),
-            ("s", self._commandPassword)
+            ("s", self._commandPassword),
+            # This padding seems to be needed, otherwise the game crashes (especially in multiplayer)
+            ("L", 0)
         )
 
     def _request_disconnection(self):
