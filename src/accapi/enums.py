@@ -1,5 +1,16 @@
 from enum import Enum
 
+__all__ = [
+    "OutboundMessageTypes",
+    "LAP_TYPE",
+    "DRIVER_CATEGORY",
+    "CAR_LOCATION",
+    "SESSION_PHASE",
+    "SESSION_TYPE",
+    "BROADCASTING_EVENT_TYPE",
+    "NATIONALITY"
+]
+
 class OutboundMessageTypes(Enum):
     REGISTER_COMMAND_APPLICATION = 1
     UNREGISTER_COMMAND_APPLICATION = 9

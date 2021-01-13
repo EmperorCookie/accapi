@@ -13,6 +13,8 @@ from .structs import \
     TrackData, \
     BroadcastingEvent
 
+__all__ = ["AccClient"]
+
 class EndOfStreamError(Exception):
     pass
 
