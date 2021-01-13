@@ -66,7 +66,7 @@ class ThreadedSocketReader(object):
         """
         # Raise exception if no data will ever come in
         self._dataLock.acquire()
-        if not self.isAlive and not self._data:
+        if not self.isAlive and (not self._data or (size is not None and len(self._data) < size)):
             self._dataLock.release()
             if self._exception is not None:
                 raise self._exception
