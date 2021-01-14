@@ -1,6 +1,23 @@
-from .enums import *
+from .enums import \
+    SESSION_TYPE, \
+    SESSION_PHASE, \
+    LAP_TYPE, \
+    CAR_LOCATION, \
+    DRIVER_CATEGORY, \
+    NATIONALITY, \
+    BROADCASTING_EVENT_TYPE
 
-_MAX_INT = 2 ** 31 - 1
+__all__ = [
+    "RegistrationResult",
+    "RealtimeUpdate",
+    "Lap",
+    "RealtimeCarUpdate",
+    "EntryList",
+    "Driver",
+    "EntryListCar",
+    "TrackData",
+    "BroadcastingEvent"
+]
 
 class RegistrationResult(object):
 
@@ -29,8 +46,8 @@ class RealtimeUpdate(object):
         self.sessionIndex = args.pop(0)
         self.sessionType = SESSION_TYPE[args.pop(0)]
         self.sessionPhase = SESSION_PHASE[args.pop(0)]
-        self.sessionTime = args.pop(0) * 1000
-        self.sessionEndTime = args.pop(0) * 1000
+        self.sessionTime = args.pop(0) / 1000
+        self.sessionEndTime = args.pop(0) / 1000
         self.focusedCarIndex = args.pop(0)
         self.activeCameraSet = args.pop(0)
         self.activeCamera = args.pop(0)
@@ -42,14 +59,14 @@ class RealtimeUpdate(object):
         else:
             self.replaySessionTime = 0
             self.replayRemainingTime = 0
-        self.timeOfDay = args.pop(0) * 1000
+        self.timeOfDay = args.pop(0) / 1000
         self.ambientTemp = args.pop(0)
         self.trackTemp = args.pop(0)
         self.clouds = args.pop(0) / 10
         self.rainLevel = args.pop(0) / 10
         self.wetness = args.pop(0) / 10
         self.bestSessionLap = Lap(*args)
-        self._leftovers = args
+        self._leftovers = self.bestSessionLap._leftovers
 
     @classmethod
     def receive(cls, receiveMethod):
@@ -68,12 +85,12 @@ class Lap(object):
 
     def __init__(self, *args):
         args = list(args)
-        self.lapTime = args.pop(0) * 1000
+        self.lapTime = args.pop(0) / 1000
         self.carIndex = args.pop(0)
         self.driverIndex = args.pop(0)
         self.splits = [args.pop(0) for _ in range(args.pop(0))]
         if len(self.splits) < 3:
-            self.splits.extend([None] * 3 - len(self.splits))
+            self.splits.extend([None] * (3 - len(self.splits)))
         self.isInvalid = args.pop(0)
         self.isValidForBest = args.pop(0)
         self.isOutlap = args.pop(0)
@@ -201,8 +218,20 @@ class TrackData(object):
         self.trackName = args.pop(0)
         self.trackId = args.pop(0)
         self.trackMeters = args.pop(0)
-        self.cameraSets = {args.pop(0): [args.pop(0) for _ in range(args.pop(0))] for _ in range(args.pop(0))}
-        self.hudPages = [args.pop(0) for _ in range(args.pop(0))]
+        self.cameraSets = {}
+        cameraSetCount = args.pop(0)
+        for _ in range(cameraSetCount):
+            cameraSetName = args.pop(0)
+            self.cameraSets[cameraSetName] = []
+            cameraCount = args.pop(0)
+            for _ in range(cameraCount):
+                cameraName = args.pop(0)
+                self.cameraSets[cameraSetName].append(cameraName)
+        self.hudPages = []
+        hudPageCount = args.pop(0)
+        for _ in range(hudPageCount):
+            hudPageName = args.pop(0)
+            self.hudPages.append(hudPageName)
         self._leftovers = args
 
     @classmethod
@@ -225,7 +254,7 @@ class BroadcastingEvent(object):
         args = list(args)
         self.type = BROADCASTING_EVENT_TYPE[args.pop(0)]
         self.message = args.pop(0)
-        self.time = args.pop(0) * 1000
+        self.time = args.pop(0) / 1000
         self.carIndex = args.pop(0)
         self._leftovers = args
 
