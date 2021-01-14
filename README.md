@@ -1,4 +1,4 @@
-# accapi
+# ACCAPI
 Assetto Corsa Competizione UDP broadcast API wrapper
 
 # To Do
