@@ -46,8 +46,8 @@ class RealtimeUpdate(object):
         self.sessionIndex = args.pop(0)
         self.sessionType = SESSION_TYPE[args.pop(0)]
         self.sessionPhase = SESSION_PHASE[args.pop(0)]
-        self.sessionTime = args.pop(0) / 1000
-        self.sessionEndTime = args.pop(0) / 1000
+        self.sessionTimeMs = args.pop(0)
+        self.sessionEndTimeMs = args.pop(0)
         self.focusedCarIndex = args.pop(0)
         self.activeCameraSet = args.pop(0)
         self.activeCamera = args.pop(0)
@@ -59,7 +59,7 @@ class RealtimeUpdate(object):
         else:
             self.replaySessionTime = 0
             self.replayRemainingTime = 0
-        self.timeOfDay = args.pop(0) / 1000
+        self.timeOfDayMs = args.pop(0)
         self.ambientTemp = args.pop(0)
         self.trackTemp = args.pop(0)
         self.clouds = args.pop(0) / 10
@@ -85,7 +85,7 @@ class Lap(object):
 
     def __init__(self, *args):
         args = list(args)
-        self.lapTime = args.pop(0) / 1000
+        self.lapTimeMs = args.pop(0)
         self.carIndex = args.pop(0)
         self.driverIndex = args.pop(0)
         self.splits = [args.pop(0) for _ in range(args.pop(0))]
@@ -254,7 +254,7 @@ class BroadcastingEvent(object):
         args = list(args)
         self.type = BROADCASTING_EVENT_TYPE[args.pop(0)]
         self.message = args.pop(0)
-        self.time = args.pop(0) / 1000
+        self.timeMs = args.pop(0)
         self.carIndex = args.pop(0)
         self._leftovers = args
 
