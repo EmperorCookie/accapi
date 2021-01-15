@@ -88,12 +88,15 @@ class ThreadedSocketReader(object):
 
             # Wait until there's enough data to fulfill the request
             if len(self._data) < size:
+                
+                # No data after timeout
                 if not self._dataLock.wait(timeout):
-                    return None
+                    data = None
 
-            # Slice data according to size
-            data = bytes(self._data[:size])
-            del self._data[:size]
+                # Slice data according to size
+                else:
+                    data = bytes(self._data[:size])
+                    del self._data[:size]
 
         # Release and return
         self._dataLock.release()
