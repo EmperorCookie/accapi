@@ -451,10 +451,7 @@ class AccClient(object):
         self._writable = False
         self._displayName = displayName
         self._updateIntervalMs = updateIntervalMs
-        self._request_connection(
-            password,
-            commandPassword
-        )
+        self._request_connection(password, commandPassword)
 
     def stop(self):
         if not self.isAlive:
