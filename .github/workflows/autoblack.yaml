@@ -18,9 +18,8 @@ jobs:
         if: failure()
         run: |
           black -l 100 .
-          git checkout origin/${{ github.head_ref }}
           git config user.name "autoblack"
           git config user.email github-actions@github.com
           git add .
           git commit -m "Format Python code with Black"
-          git push
+          git push origin HEAD:${{ github.head_ref }}
