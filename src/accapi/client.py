@@ -347,16 +347,9 @@ class AccClient(object):
 
         # Change focused car
         if carIndex >= 0:
-            args.extend(
-                [
-                    ("?", True),
-                    ("H", carIndex),
-                ]
-            )
+            args.extend([("?", True), ("H", carIndex),])
         else:
-            args.append(
-                ("?", False),
-            )
+            args.append(("?", False),)
 
         # Change camera
         if cameraSet and camera:

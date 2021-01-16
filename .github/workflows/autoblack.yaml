@@ -20,6 +20,9 @@ jobs:
         if: failure()
         run: |
           black -l 100 .
+      - name: Push Changes
+        if: failure()
+        run: |
           git config user.name "autoblack"
           git config user.email github-actions@github.com
           git add .
