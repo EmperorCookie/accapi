@@ -1,11 +1,12 @@
-from .enums import \
-    SESSION_TYPE, \
-    SESSION_PHASE, \
-    LAP_TYPE, \
-    CAR_LOCATION, \
-    DRIVER_CATEGORY, \
-    NATIONALITY, \
-    BROADCASTING_EVENT_TYPE
+from .enums import (
+    SESSION_TYPE,
+    SESSION_PHASE,
+    LAP_TYPE,
+    CAR_LOCATION,
+    DRIVER_CATEGORY,
+    NATIONALITY,
+    BROADCASTING_EVENT_TYPE,
+)
 
 __all__ = [
     "RegistrationResult",
@@ -16,11 +17,11 @@ __all__ = [
     "Driver",
     "EntryListCar",
     "TrackData",
-    "BroadcastingEvent"
+    "BroadcastingEvent",
 ]
 
-class RegistrationResult(object):
 
+class RegistrationResult(object):
     def __init__(self, *args):
         args = list(args)
         self.connectionId = args.pop(0)
@@ -38,8 +39,8 @@ class RegistrationResult(object):
         args = receiveMethod("i??s")
         return args
 
-class RealtimeUpdate(object):
 
+class RealtimeUpdate(object):
     def __init__(self, *args):
         args = list(args)
         self.eventIndex = args.pop(0)
@@ -81,8 +82,8 @@ class RealtimeUpdate(object):
         args.extend(Lap.receive_args(receiveMethod))
         return args
 
-class Lap(object):
 
+class Lap(object):
     def __init__(self, *args):
         args = list(args)
         self.lapTimeMs = args.pop(0)
@@ -109,8 +110,8 @@ class Lap(object):
         args.extend(receiveMethod("????"))
         return args
 
-class RealtimeCarUpdate(object):
 
+class RealtimeCarUpdate(object):
     def __init__(self, *args):
         args = list(args)
         self.carIndex = args.pop(0)
@@ -144,8 +145,8 @@ class RealtimeCarUpdate(object):
             args.extend(Lap.receive_args(receiveMethod))
         return args
 
-class EntryList(object):
 
+class EntryList(object):
     def __init__(self, *args):
         args = list(args)
         self.connectionId = args.pop(0)
@@ -162,8 +163,8 @@ class EntryList(object):
         args.extend(receiveMethod("H" * args[-1]))
         return args
 
-class Driver(object):
 
+class Driver(object):
     def __init__(self, *args):
         args = list(args)
         self.firstName = args.pop(0)
@@ -182,8 +183,8 @@ class Driver(object):
         args = receiveMethod("sssBH")
         return args
 
-class EntryListCar(object):
 
+class EntryListCar(object):
     def __init__(self, *args):
         args = list(args)
         self.carIndex = args.pop(0)
@@ -210,8 +211,8 @@ class EntryListCar(object):
             args.extend(Driver.receive_args(receiveMethod))
         return args
 
-class TrackData(object):
 
+class TrackData(object):
     def __init__(self, *args):
         args = list(args)
         self.connectionId = args.pop(0)
@@ -248,8 +249,8 @@ class TrackData(object):
         args.extend(receiveMethod("s" * args[-1]))
         return args
 
-class BroadcastingEvent(object):
 
+class BroadcastingEvent(object):
     def __init__(self, *args):
         args = list(args)
         self.type = BROADCASTING_EVENT_TYPE[args.pop(0)]
