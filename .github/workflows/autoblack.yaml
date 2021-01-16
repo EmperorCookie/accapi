@@ -18,6 +18,7 @@ jobs:
         if: failure()
         run: |
           black -l 100 .
+          git checkout ${{ github.ref }}
           git config user.name "autoblack"
           git config user.email github-actions@github.com
           git add .
