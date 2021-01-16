@@ -8,8 +8,9 @@ __all__ = [
     "SESSION_PHASE",
     "SESSION_TYPE",
     "BROADCASTING_EVENT_TYPE",
-    "NATIONALITY"
+    "NATIONALITY",
 ]
+
 
 class OutboundMessageTypes(Enum):
     REGISTER_COMMAND_APPLICATION = 1
@@ -25,33 +26,30 @@ class OutboundMessageTypes(Enum):
     PLAY_MANUAL_REPLAY_HIGHLIGHT = 52
     SAVE_MANUAL_REPLAY_HIGHLIGHT = 60
 
-LAP_TYPE = \
-{
+
+LAP_TYPE = {
     0: "Regular",
     1: "Outlap",
-    2: "Inlap"
+    2: "Inlap",
 }
 
-DRIVER_CATEGORY = \
-{
+DRIVER_CATEGORY = {
     0: "Bronze",
     1: "Silver",
     2: "Gold",
     3: "Platinum",
-    255: "Unknown"
+    255: "Unknown",
 }
 
-CAR_LOCATION = \
-{
+CAR_LOCATION = {
     0: "Unknown",
     1: "Track",
     2: "Pitlane",
     3: "Pit Entry",
-    4: "Pit Exit"
+    4: "Pit Exit",
 }
 
-SESSION_PHASE = \
-{
+SESSION_PHASE = {
     0: "Unknown",
     1: "Starting",
     2: "Pre Formation",
@@ -60,11 +58,10 @@ SESSION_PHASE = \
     5: "Session",
     6: "Session Over",
     7: "Post Session",
-    8: "Result UI"
+    8: "Result UI",
 }
 
-SESSION_TYPE = \
-{
+SESSION_TYPE = {
     0: "Practice",
     4: "Qualifying",
     9: "Superpole",
@@ -72,11 +69,10 @@ SESSION_TYPE = \
     11: "Hotlap",
     12: "Hot Stint",
     13: "Hotlap Superpole",
-    14: "Replay"
+    14: "Replay",
 }
 
-BROADCASTING_EVENT_TYPE = \
-{
+BROADCASTING_EVENT_TYPE = {
     0: "Unknown",
     1: "Green Flag",
     2: "Session Over",
@@ -84,11 +80,10 @@ BROADCASTING_EVENT_TYPE = \
     4: "Accident",
     5: "Lap Completed",
     6: "Best Session Lap",
-    7: "Best Personal Lap"
+    7: "Best Personal Lap",
 }
 
-NATIONALITY = \
-{
+NATIONALITY = {
     0: "Unknown",
     1: "Italy",
     2: "Germany",
@@ -166,5 +161,5 @@ NATIONALITY = \
     74: "Taiwan",
     75: "Ukraine",
     76: "Venezuela",
-    77: "Wales"
+    77: "Wales",
 }
