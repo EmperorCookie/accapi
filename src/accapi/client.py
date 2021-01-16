@@ -1,22 +1,24 @@
 from threading import Thread, Condition
 import socket
 import struct
-import time
 
 from .enums import OutboundMessageTypes
-from .structs import \
-    RegistrationResult, \
-    RealtimeUpdate, \
-    RealtimeCarUpdate, \
-    EntryList, \
-    EntryListCar, \
-    TrackData, \
-    BroadcastingEvent
+from .structs import (
+    RegistrationResult,
+    RealtimeUpdate,
+    RealtimeCarUpdate,
+    EntryList,
+    EntryListCar,
+    TrackData,
+    BroadcastingEvent,
+)
 
 __all__ = ["AccClient"]
 
+
 class EndOfStreamError(Exception):
     pass
+
 
 class ThreadedSocketReader(object):
     """
@@ -30,13 +32,14 @@ class ThreadedSocketReader(object):
         isAlive (bool): The reader will terminate its thread if the source has been closed.
         size (int): How much data has been read so far.
     """
-    def __init__(self, source:socket.socket, chunkSize = 1024):
+
+    def __init__(self, source: socket.socket, chunkSize: int = 1024):
         self._source = source
         self._chunkSize = chunkSize
         self._data = bytearray()
         self._dataLock = Condition()
         self._stopSignal = False
-        self._thread = Thread(target = self._run)
+        self._thread = Thread(target=self._run)
         self._thread.setDaemon(True)
         self._thread.start()
         self._exception = None
@@ -54,7 +57,7 @@ class ThreadedSocketReader(object):
         self._dataLock.release()
         return size
 
-    def read(self, size = None, timeout: int = None):
+    def read(self, size: int = None, timeout: int = None):
         """
         Reads data from the stream.
 
@@ -122,10 +125,12 @@ class ThreadedSocketReader(object):
             self._dataLock.notify_all()
             self._dataLock.release()
 
+
 class Event(object):
     def __init__(self, source, content):
         self.source = source
         self.content = content
+
 
 class Observable(object):
     def __init__(self):
@@ -137,6 +142,7 @@ class Observable(object):
 
     def subscribe(self, callback):
         self._callbacks.append(callback)
+
 
 class AccClient(object):
 
@@ -165,15 +171,14 @@ class AccClient(object):
         self._cars = {}
 
         # Receive methods
-        self._receiveMethods = \
-        {
+        self._receiveMethods = {
             1: self._receive_registration_result,
             2: self._receive_realtime_update,
             3: self._receive_realtime_car_udpate,
             4: self._receive_entry_list,
             5: self._receive_track_data,
             6: self._receive_entry_list_car,
-            7: self._receive_broadcasting_event
+            7: self._receive_broadcasting_event,
         }
 
         # Thread
@@ -185,7 +190,7 @@ class AccClient(object):
         if state != self._connectionState:
             self._connectionState = state
             for callback in self._onConnectionStateChange.callbacks:
-                callback(Event(self, content = self._connectionState))
+                callback(Event(self, content=self._connectionState))
 
     @property
     def connectionState(self):
@@ -243,20 +248,22 @@ class AccClient(object):
         out = []
         for f in fmt:
             if f == "s":
-                length, = struct.unpack(f"{self.endianess}H", self._reader.read(2))
+                (length,) = struct.unpack(f"{self.endianess}H", self._reader.read(2))
                 if length > 0:
                     out.append(self._reader.read(length).decode("utf8"))
                 else:
                     out.append("")
             else:
-                val, = struct.unpack(f"{self.endianess}{f}", self._reader.read(struct.calcsize(f)))
+                (val,) = struct.unpack(
+                    f"{self.endianess}{f}", self._reader.read(struct.calcsize(f))
+                )
                 out.append(val)
         return out
 
     def _receive_registration_result(self):
         result = RegistrationResult.receive(self._receive)
         if not result.success:
-            self._stop(state = f"rejected ({result.errorMessage})")
+            self._stop(state=f"rejected ({result.errorMessage})")
         self._connectionId = result.connectionId
         self._writable = result.writable
         self._update_connection_state("established")
@@ -303,69 +310,67 @@ class AccClient(object):
             event = BroadcastingEvent(*args)
             callback(Event(self, event))
 
-    def _request_connection(
-        self,
-        password: str,
-        commandPassword: str
-    ):
+    def _request_connection(self, password: str, commandPassword: str):
         self._send(
             ("B", OutboundMessageTypes.REGISTER_COMMAND_APPLICATION.value),
             ("B", self._broadcastingProtocolVersion),
             ("s", self._displayName),
             ("s", password),
             ("i", self._updateIntervalMs),
-            ("s", commandPassword)
+            ("s", commandPassword),
         )
 
     def _request_disconnection(self):
         self._send(
             ("B", OutboundMessageTypes.UNREGISTER_COMMAND_APPLICATION.value),
-            ("i", self._connectionId)
+            ("i", self._connectionId),
         )
 
     def _request_entry_list(self):
         self._send(
             ("B", OutboundMessageTypes.REQUEST_ENTRY_LIST.value),
-            ("i", self._connectionId)
+            ("i", self._connectionId),
         )
 
     def _request_track_data(self):
         self._send(
             ("B", OutboundMessageTypes.REQUEST_TRACK_DATA.value),
-            ("i", self._connectionId)
+            ("i", self._connectionId),
         )
 
-    def request_focus_change(
-        self,
-        carIndex: int = -1,
-        cameraSet: str = None,
-        camera: str = None
-    ):
+    def request_focus_change(self, carIndex: int = -1, cameraSet: str = None, camera: str = None):
         # Base message
-        args = \
-        [
+        args = [
             ("B", OutboundMessageTypes.CHANGE_FOCUS.value),
             ("i", self._connectionId),
         ]
 
         # Change focused car
         if carIndex >= 0:
-            args.extend([
-                ("?", True),
-                ("H", carIndex)
-            ])
+            args.extend(
+                [
+                    ("?", True),
+                    ("H", carIndex),
+                ]
+            )
         else:
-            args.append(("?", False))
+            args.append(
+                ("?", False),
+            )
 
         # Change camera
         if cameraSet and camera:
-            args.extend([
-                ("?", True),
-                ("s", cameraSet),
-                ("s", camera)
-            ])
+            args.extend(
+                [
+                    ("?", True),
+                    ("s", cameraSet),
+                    ("s", camera),
+                ]
+            )
         else:
-            args.append(("?", False))
+            args.append(
+                ("?", False),
+            )
 
         # Send
         self._send(*args)
@@ -376,7 +381,7 @@ class AccClient(object):
         durationMs: float,
         carIndex: int = -1,
         cameraSet: str = "",
-        camera: str = ""
+        camera: str = "",
     ):
         self._send(
             ("B", OutboundMessageTypes.INSTANT_REPLAY_REQUEST.value),
@@ -385,27 +390,27 @@ class AccClient(object):
             ("f", durationMs),
             ("i", carIndex),
             ("s", cameraSet),
-            ("s", camera)
+            ("s", camera),
         )
 
     def request_hud_page(self, pageName: str):
         self._send(
             ("B", OutboundMessageTypes.CHANGE_HUD_PAGE.value),
             ("i", self._connectionId),
-            ("s", pageName)
+            ("s", pageName),
         )
 
     def _run(self):
         try:
             while not self._stopSignal:
                 try:
-                    messageTypeData = self._reader.read(1, timeout = 0.1)
+                    messageTypeData = self._reader.read(1, timeout=0.1)
                 except (ConnectionResetError, EndOfStreamError):
                     self._update_connection_state("lost")
                     break
                 if messageTypeData is None:
                     continue
-                messageType, = struct.unpack("B", messageTypeData)
+                (messageType,) = struct.unpack("B", messageTypeData)
                 self._receiveMethods[messageType]()
         finally:
             try:
@@ -430,7 +435,7 @@ class AccClient(object):
         password: str,
         commandPassword: str = "",
         displayName: str = "Python ACCAPI",
-        updateIntervalMs: int = 100
+        updateIntervalMs: int = 100,
     ):
         if self.isAlive:
             raise ValueError("Must be stopped")
@@ -439,24 +444,21 @@ class AccClient(object):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket.settimeout(1)
         self._reader = ThreadedSocketReader(self._socket)
-        self._thread = Thread(target = self._run)
+        self._thread = Thread(target=self._run)
         self._stopSignal = False
         self._thread.start()
         self._connectionId = None
         self._writable = False
         self._displayName = displayName
         self._updateIntervalMs = updateIntervalMs
-        self._request_connection(
-            password,
-            commandPassword
-        )
+        self._request_connection(password, commandPassword)
 
     def stop(self):
         if not self.isAlive:
             raise ValueError("Must be started")
         self._stop()
 
-    def _stop(self, state = "disconnected"):
+    def _stop(self, state: str = "disconnected"):
         self._stopSignal = True
         if self._thread is not None:
             self._thread.join()
