@@ -171,7 +171,8 @@ class Driver(object):
         self.lastName = args.pop(0)
         self.shortName = args.pop(0)
         self.category = DRIVER_CATEGORY[args.pop(0)]
-        self.nationality = NATIONALITY[args.pop(0)]
+        nationality = args.pop(0)
+        self.nationality = NATIONALITY.get(nationality, f"Unknown ({nationality})")
         self._leftovers = args
 
     @classmethod
@@ -193,7 +194,8 @@ class EntryListCar(object):
         self.raceNumber = args.pop(0)
         self.cupCategory = args.pop(0)
         self.currentDriverIndex = args.pop(0)
-        self.nationality = NATIONALITY[args.pop(0)]
+        nationality = args.pop(0)
+        self.nationality = NATIONALITY.get(nationality, f"Unknown ({nationality})")
         self.drivers = []
         for _ in range(args.pop(0)):
             self.drivers.append(Driver(*args))
