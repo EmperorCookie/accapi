@@ -14,3 +14,14 @@ jobs:
         run: pip install black
       - name: Check Style
         run: black -l 100 --check .
+      - uses: actions/github-script@v3
+        if: failure()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Code does not match the Black style (100 columns), please format using `black -l 100 .`.'
+            })
