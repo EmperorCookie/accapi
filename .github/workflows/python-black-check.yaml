@@ -19,9 +19,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
+            github.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'REQUEST_CHANGES',
               body: 'Code does not match the Black style (100 columns), please format using `black -l 100 .`.'
             })
