@@ -27,8 +27,7 @@ class OutboundMessageTypes(Enum):
     SAVE_MANUAL_REPLAY_HIGHLIGHT = 60
 
 
-LAP_TYPE = \
-{
+LAP_TYPE = {
     0: "Regular",
     1: "Outlap",
     2: "Inlap",
