@@ -39,7 +39,7 @@ class ThreadedSocketReader(object):
         self._data = bytearray()
         self._dataLock = Condition()
         self._stopSignal = False
-        self._thread = Thread(target = self._run)
+        self._thread = Thread(target=self._run)
         self._thread.setDaemon(True)
         self._thread.start()
         self._exception = None
