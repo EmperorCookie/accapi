@@ -12,6 +12,11 @@ __all__ = [
 ]
 
 
+class MissingHandlingDict(dict):
+    def __missing__(self, k):
+        return f"Not found ({k})"
+
+
 class OutboundMessageTypes(Enum):
     REGISTER_COMMAND_APPLICATION = 1
     UNREGISTER_COMMAND_APPLICATION = 9
@@ -83,7 +88,7 @@ BROADCASTING_EVENT_TYPE = {
     7: "Best Personal Lap",
 }
 
-NATIONALITY = {
+NATIONALITY = MissingHandlingDict({
     0: "Unknown",
     1: "Italy",
     2: "Germany",
@@ -162,4 +167,4 @@ NATIONALITY = {
     75: "Ukraine",
     76: "Venezuela",
     77: "Wales",
-}
+})
