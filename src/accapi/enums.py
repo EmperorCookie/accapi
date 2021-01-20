@@ -32,29 +32,29 @@ class OutboundMessageTypes(Enum):
     SAVE_MANUAL_REPLAY_HIGHLIGHT = 60
 
 
-LAP_TYPE = {
+LAP_TYPE = MissingHandlingDict({
     0: "Regular",
     1: "Outlap",
     2: "Inlap",
-}
+})
 
-DRIVER_CATEGORY = {
+DRIVER_CATEGORY = MissingHandlingDict({
     0: "Bronze",
     1: "Silver",
     2: "Gold",
     3: "Platinum",
     255: "Unknown",
-}
+})
 
-CAR_LOCATION = {
+CAR_LOCATION = MissingHandlingDict({
     0: "Unknown",
     1: "Track",
     2: "Pitlane",
     3: "Pit Entry",
     4: "Pit Exit",
-}
+})
 
-SESSION_PHASE = {
+SESSION_PHASE = MissingHandlingDict({
     0: "Unknown",
     1: "Starting",
     2: "Pre Formation",
@@ -64,9 +64,9 @@ SESSION_PHASE = {
     6: "Session Over",
     7: "Post Session",
     8: "Result UI",
-}
+})
 
-SESSION_TYPE = {
+SESSION_TYPE = MissingHandlingDict({
     0: "Practice",
     4: "Qualifying",
     9: "Superpole",
@@ -75,9 +75,9 @@ SESSION_TYPE = {
     12: "Hot Stint",
     13: "Hotlap Superpole",
     14: "Replay",
-}
+})
 
-BROADCASTING_EVENT_TYPE = {
+BROADCASTING_EVENT_TYPE = MissingHandlingDict({
     0: "Unknown",
     1: "Green Flag",
     2: "Session Over",
@@ -86,7 +86,7 @@ BROADCASTING_EVENT_TYPE = {
     5: "Lap Completed",
     6: "Best Session Lap",
     7: "Best Personal Lap",
-}
+})
 
 NATIONALITY = MissingHandlingDict({
     0: "Unknown",
