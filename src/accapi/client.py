@@ -327,50 +327,26 @@ class AccClient(object):
         )
 
     def _request_entry_list(self):
-        self._send(
-            ("B", OutboundMessageTypes.REQUEST_ENTRY_LIST.value),
-            ("i", self._connectionId),
-        )
+        self._send(("B", OutboundMessageTypes.REQUEST_ENTRY_LIST.value), ("i", self._connectionId))
 
     def _request_track_data(self):
-        self._send(
-            ("B", OutboundMessageTypes.REQUEST_TRACK_DATA.value),
-            ("i", self._connectionId),
-        )
+        self._send(("B", OutboundMessageTypes.REQUEST_TRACK_DATA.value), ("i", self._connectionId))
 
     def request_focus_change(self, carIndex: int = -1, cameraSet: str = None, camera: str = None):
         # Base message
-        args = [
-            ("B", OutboundMessageTypes.CHANGE_FOCUS.value),
-            ("i", self._connectionId),
-        ]
+        args = [("B", OutboundMessageTypes.CHANGE_FOCUS.value), ("i", self._connectionId)]
 
         # Change focused car
         if carIndex >= 0:
-            args.extend(
-                [
-                    ("?", True),
-                    ("H", carIndex),
-                ]
-            )
+            args.extend([("?", True), ("H", carIndex)])
         else:
-            args.append(
-                ("?", False),
-            )
+            args.append(("?", False))
 
         # Change camera
         if cameraSet and camera:
-            args.extend(
-                [
-                    ("?", True),
-                    ("s", cameraSet),
-                    ("s", camera),
-                ]
-            )
+            args.extend([("?", True), ("s", cameraSet), ("s", camera)])
         else:
-            args.append(
-                ("?", False),
-            )
+            args.append(("?", False))
 
         # Send
         self._send(*args)

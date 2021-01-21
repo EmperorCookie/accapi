@@ -35,9 +35,7 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.8",
     ],
-    project_urls={
-        "Source": "https://github.com/EmperorCookie/accapi",
-    },
+    project_urls={"Source": "https://github.com/EmperorCookie/accapi"},
     python_requires=">=3.8",
     install_requires=requirements,
     tests_require=[
