@@ -174,7 +174,7 @@ class AccClient(object):
         self._receiveMethods = {
             1: self._receive_registration_result,
             2: self._receive_realtime_update,
-            3: self._receive_realtime_car_udpate,
+            3: self._receive_realtime_car_update,
             4: self._receive_entry_list,
             5: self._receive_track_data,
             6: self._receive_entry_list_car,
@@ -276,7 +276,7 @@ class AccClient(object):
             update = RealtimeUpdate(*args)
             callback(Event(self, update))
 
-    def _receive_realtime_car_udpate(self):
+    def _receive_realtime_car_update(self):
         args = RealtimeCarUpdate.receive_args(self._receive)
         update = RealtimeCarUpdate(*args)
         if update.carIndex in self._cars and self._cars[update.carIndex] == update.driverCount:
