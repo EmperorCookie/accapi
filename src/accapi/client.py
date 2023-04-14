@@ -48,7 +48,7 @@ class ThreadedSocketReader(object):
     def isAlive(self):
         if self._thread is None:
             return False
-        return self._thread.isAlive()
+        return self._thread.is_alive()
 
     @property
     def size(self):
@@ -402,7 +402,7 @@ class AccClient(object):
     def isAlive(self):
         if self._thread is None:
             return False
-        return self._thread.isAlive()
+        return self._thread.is_alive()
 
     def start(
         self,
