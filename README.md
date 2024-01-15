@@ -35,7 +35,7 @@ client.onBroadcastingEvent.subscribe(print_content_class)
 client.start(ACC_URL, ACC_PORT, ACC_PASSWORD)
 
 # Control ACC
-client.request_focus_change(carIndex=0, cameraSet="Bonnet") # Car focus and camera
+client.request_focus_change(carIndex=0, cameraSet="drivable", camera="Bonnet") # Car focus and camera
 client.request_hud_page(pageName="Help")
 client.request_instant_replay(startTime=42, durationMs=10000)
 time.sleep(10) # Wait for replay to finish
