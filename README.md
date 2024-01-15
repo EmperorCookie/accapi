@@ -12,9 +12,8 @@ ACC_URL = "URL"
 ACC_PORT = 9001
 ACC_PASSWORD = "PASSWORD"
 
-# Create client and connect
+# Create client
 client = AccClient()
-client.start(ACC_URL, ACC_PORT, ACC_PASSWORD)
 
 # Register callback
 def on_connection_state_change(event: Event) -> None:
@@ -31,6 +30,9 @@ client.onEntryListCarUpdate.subscribe(print_content_class)
 client.onRealtimeUpdate.subscribe(print_content_class)
 client.onRealtimeCarUpdate.subscribe(print_content_class)
 client.onBroadcastingEvent.subscribe(print_content_class)
+
+# Only start the client after registering the callbacks
+client.start(ACC_URL, ACC_PORT, ACC_PASSWORD)
 
 # Control ACC
 client.request_focus_change(carIndex=0, cameraSet="Bonnet") # Car focus and camera
